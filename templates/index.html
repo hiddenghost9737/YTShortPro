@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if active_page == 'home' %}
+            TubeShortsGrab - Download YouTube Shorts Easily
+        {% elif active_page == 'about' %}
+            TubeShortsGrab - About Us
+        {% elif active_page == 'faq' %}
+            TubeShortsGrab - Frequently Asked Questions
+        {% elif active_page == 'contact' %}
+            TubeShortsGrab - Contact Us
+        {% elif active_page == 'terms' %}
+            TubeShortsGrab - Terms of Service
+        {% elif active_page == 'privacy' %}
+            TubeShortsGrab - Privacy Policy
+        {% elif active_page == 'disclaimer' %}
+            TubeShortsGrab - Disclaimer
+        {% elif active_page == 'dmca' %}
+            TubeShortsGrab - DMCA Policy
+        {% else %}
+            TubeShortsGrab - YouTube Shorts Downloader
+        {% endif %}
+    </title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Download YouTube Shorts videos in HD quality for free. No registration required. Fast, secure, and easy to use YouTube Shorts downloader.">
+    <meta name="keywords" content="YouTube Shorts downloader, download YouTube Shorts, YouTube Shorts to MP4, YouTube Shorts to MP3, save YouTube Shorts, YouTube Shorts converter, free YouTube Shorts downloader">
+    <meta name="author" content="TubeShortsGrab">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="TubeShortsGrab - Download YouTube Shorts Easily">
+    <meta property="og:description" content="Download YouTube Shorts videos in HD quality for free. No registration required. Fast, secure, and easy to use.">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg', _external=True) }}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="TubeShortsGrab - Download YouTube Shorts Easily">
+    <meta property="twitter:description" content="Download YouTube Shorts videos in HD quality for free. No registration required. Fast, secure, and easy to use.">
+    <meta property="twitter:image" content="{{ url_for('static', filename='images/twitter-image.jpg', _external=True) }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="canonical" href="{{ request.url }}">
+    
+    <!-- Structured Data for All Pages -->
+    {% if active_page == 'home' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TubeShortsGrab",
+      "url": "{{ url_for('home', _external=True) }}",
+      "description": "Download YouTube Shorts videos in HD quality for free. No registration required. Fast, secure, and easy to use.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ url_for('home', _external=True) }}?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TubeShortsGrab",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "A free online tool to download YouTube Shorts videos in high quality."
+    }
+    </script>
+    {% elif active_page == 'about' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "About TubeShortsGrab",
+      "description": "Learn more about TubeShortsGrab, its purpose, and how it helps users download YouTube Shorts videos easily.",
+      "url": "{{ url_for('about', _external=True) }}"
+    }
+    </script>
+    {% elif active_page == 'faq' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is TubeShortsGrab completely free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, TubeShortsGrab is 100% free to use. We don't charge any fees for downloading YouTube Shorts, and there are no hidden costs or premium tiers. Our service is supported by minimal, non-intrusive advertisements that help us cover our operational costs while keeping the service free for everyone."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it legal to download YouTube Shorts?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The legality of downloading YouTube content varies by country and context. Generally, downloading videos for personal, non-commercial use falls under 'fair use' in many jurisdictions. However, redistributing downloaded content, using it commercially without permission, or downloading copyrighted material may violate copyright laws. We recommend only downloading content that you have permission to download, such as videos with Creative Commons licenses, public domain content, or your own uploaded videos. Always respect copyright laws and the rights of content creators."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What video formats and quality options are available?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "TubeShortsGrab offers multiple download options to suit your needs: MP4 HD (High-definition video with audio up to 1080p, depending on the original video quality), MP4 SD (Standard-definition video with audio at 480p, ideal for saving space), and MP3 (Audio-only format, perfect for music or podcasts). The available quality options depend on the original quality of the YouTube Short. Our system automatically detects and offers the best available options for each video."
+          }
+        }
+      ]
+    }
+    </script>
+    {% elif active_page == 'contact' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "Contact Us",
+      "url": "{{ url_for('contact', _external=True) }}",
+      "description": "Get in touch with the TubeShortsGrab team for questions, suggestions, or support."
+    }
+    </script>
+    {% elif active_page == 'terms' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Terms of Service",
+      "url": "{{ url_for('terms', _external=True) }}",
+      "description": "Read our terms of service to understand the rules and guidelines for using TubeShortsGrab."
+    }
+    </script>
+    {% elif active_page == 'privacy' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Privacy Policy",
+      "url": "{{ url_for('privacy', _external=True) }}",
+      "description": "Read our privacy policy to understand how we handle your data and keep your information safe at TubeShortsGrab."
+    }
+    </script>
+    {% elif active_page == 'disclaimer' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Disclaimer",
+      "url": "{{ url_for('disclaimer', _external=True) }}",
+      "description": "Read our disclaimer to understand the limitations and responsibilities when using TubeShortsGrab."
+    }
+    </script>
+    {% elif active_page == 'dmca' %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "DMCA Policy",
+      "url": "{{ url_for('dmca', _external=True) }}",
+      "description": "Read our DMCA policy to understand how we handle copyright infringement claims at TubeShortsGrab."
+    }
+    </script>
+    {% endif %}
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TubeShortsGrab",
+      "url": "{{ url_for('home', _external=True) }}",
+      "logo": "{{ url_for('static', filename='images/logo.png', _external=True) }}",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+1-555-123-4567",
+        "contactType": "customer service",
+        "email": "support@ytshortpro.com",
+        "availableLanguage": "English"
+      },
+      "sameAs": [
+        "https://www.instagram.com/rootedbeast"
+      ]
+    }
+    </script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                </svg>
+                <h1>TubeShortsGrab</h1>
+            </div>
+            <button class="nav-toggle" id="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav id="nav">
+                <ul>
+                    <li><a href="{{ url_for('home') }}" class="nav-link {% if active_page == 'home' %}active{% endif %}">Home</a></li>
+                    <li><a href="{{ url_for('about') }}" class="nav-link {% if active_page == 'about' %}active{% endif %}">About</a></li>
+                    <li><a href="{{ url_for('faq') }}" class="nav-link {% if active_page == 'faq' %}active{% endif %}">FAQ</a></li>
+                    <li><a href="{{ url_for('contact') }}" class="nav-link {% if active_page == 'contact' %}active{% endif %}">Contact</a></li>
+                    <li><a href="{{ url_for('terms') }}" class="nav-link {% if active_page == 'terms' %}active{% endif %}">Terms</a></li>
+                    <li><a href="{{ url_for('privacy') }}" class="nav-link {% if active_page == 'privacy' %}active{% endif %}">Privacy</a></li>
+                    <li><a href="{{ url_for('disclaimer') }}" class="nav-link {% if active_page == 'disclaimer' %}active{% endif %}">Disclaimer</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Home Page -->
+        <section id="home" class="page {% if active_page == 'home' %}active{% endif %}">
+            <div class="hero">
+                <div class="hero-content">
+                    <h2>Download YouTube Shorts in Seconds</h2>
+                    <p>The fastest and most reliable way to download YouTube Shorts videos in high quality. No registration required, completely free!</p>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="card" id="downloader">
+                    <div class="card-header">
+                        <h2 class="card-title">YouTube Shorts Downloader</h2>
+                        <p>Enter the URL of the YouTube Short you want to download</p>
+                    </div>
+                    <form id="download-form">
+                        <div class="form-group">
+                            <label for="video-url">YouTube Shorts URL:</label>
+                            <input type="url" id="video-url" placeholder="https://youtube.com/shorts/XXXXXXXXXXX" required>
+                            <div class="error" id="url-error"></div>
+                        </div>
+                        <button type="submit" id="search-btn">
+                            <i class="fas fa-search"></i> Search Video
+                        </button>
+                    </form>
+
+                    <div class="loader" id="loader">
+                        <div class="spinner"></div>
+                        <p>Processing your request...</p>
+                    </div>
+
+                    <div class="result" id="result">
+                        <h3>Video Found</h3>
+                        <div class="video-info">
+                            <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="Video thumbnail" class="thumbnail" id="video-thumbnail">
+                            <div class="info">
+                                <h4 id="video-title">Video Title</h4>
+                                <p id="video-author">Channel Name</p>
+                                <p id="video-duration">Duration: 00:30</p>
+                                <p id="video-views">Views: 1.2M</p>
+                            </div>
+                        </div>
+                        <div class="download-options" id="download-options">
+                            <!-- Download buttons will be added dynamically -->
+                        </div>
+                        <div class="disclaimer">
+                            <p><strong>Disclaimer:</strong> This tool is for educational purposes only. Please respect YouTube's Terms of Service and copyright laws. Only download videos that you have permission to download.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h3 class="feature-title">Lightning Fast</h3>
+                        <p>Download YouTube Shorts videos in seconds with our optimized processing engine.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="feature-title">100% Safe</h3>
+                        <p>No registration required, no personal data collected. Your privacy is our priority.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3 class="feature-title">High Quality</h3>
+                        <p>Download videos in the highest available quality, up to 1080p HD.</p>
+                    </div>
+                </div>
+
+                <div class="how-to">
+                    <h2>How to Download YouTube Shorts</h2>
+                    <ol class="steps">
+                        <li>
+                            <h3>Copy the URL of the YouTube Short</h3>
+                            <p>Open the YouTube app or website and navigate to the Short you want to download. Click on the "Share" button and copy the URL.</p>
+                        </li>
+                        <li>
+                            <h3>Paste the URL in the input field</h3>
+                            <p>Come back to TubeShortsGrab and paste the copied URL into the input field above.</p>
+                        </li>
+                        <li>
+                            <h3>Click on "Search Video"</h3>
+                            <p>Our system will process the URL and fetch the video information for you.</p>
+                        </li>
+                        <li>
+                            <h3>Choose your preferred format</h3>
+                            <p>Select from MP4 HD, MP4 SD, or MP3 audio only, depending on your needs.</p>
+                        </li>
+                        <li>
+                            <h3>Download and enjoy!</h3>
+                            <p>Click the download button and save the file to your device. Now you can enjoy your favorite YouTube Shorts offline!</p>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Page -->
+        <section id="about" class="page {% if active_page == 'about' %}active{% endif %}">
+            <div class="container">
+                <h1>About TubeShortsGrab</h1>
+                
+                <div class="about-section">
+                    <div class="about-content">
+                        <h2>Our Mission</h2>
+                        <p>At TubeShortsGrab, our mission is to provide a seamless and efficient way for users to download and enjoy YouTube Shorts videos offline. We believe in making content accessible to everyone, everywhere, regardless of internet connectivity or bandwidth limitations.</p>
+                        <p>Founded in 2023, TubeShortsGrab has quickly become one of the most trusted YouTube Shorts downloaders on the web, serving millions of users worldwide with our fast, reliable, and user-friendly platform.</p>
+                        <p>We are committed to continuous improvement and innovation, constantly updating our technology to ensure the best possible experience for our users. Our team of dedicated developers works tirelessly to maintain the highest standards of performance, security, and ease of use.</p>
+                    </div>
+                    <div class="about-image">
+                        <div class="text-label">Team Working Together</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Why Choose TubeShortsGrab?</h2>
+                    <p>In the crowded landscape of video downloaders, TubeShortsGrab stands out for several key reasons:</p>
+                    
+                    <h3>Unmatched Speed and Efficiency</h3>
+                    <p>Our advanced processing engine can handle even the most popular YouTube Shorts with lightning-fast speed. No more waiting for minutes to download a simple video - with TubeShortsGrab, your content is ready in seconds.</p>
+                    
+                    <h3>Superior Quality</h3>
+                    <p>We prioritize quality, ensuring that you can download videos in the highest available resolution. Whether you're looking for crisp HD videos or high-quality audio files, TubeShortsGrab delivers exceptional results every time.</p>
+                    
+                    <h3>User-Friendly Interface</h3>
+                    <p>We've designed our platform with simplicity in mind. The intuitive interface makes it easy for anyone, regardless of technical expertise, to download their favorite YouTube Shorts with just a few clicks.</p>
+                    
+                    <h3>Comprehensive Format Options</h3>
+                    <p>TubeShortsGrab offers a variety of download options to suit your needs. Whether you want to download videos in HD or SD quality, or extract just the audio in MP3 format, we've got you covered.</p>
+                    
+                    <h3>No Registration Required</h3>
+                    <p>Unlike many other services, TubeShortsGrab doesn't require you to create an account or provide personal information. Simply paste the URL, select your preferred format, and download - it's that simple.</p>
+                    
+                    <h3>Completely Free</h3>
+                    <p>TubeShortsGrab is and always will be 100% free to use. We believe in providing value without hidden costs or premium tiers.</p>
+                    
+                    <h3>Privacy-Focused</h3>
+                    <p>We respect your privacy and do not track your downloads or store your personal data. Your activity on TubeShortsGrab remains private and secure.</p>
+                </div>
+
+                <div class="team-section">
+                    <h2>Meet Our Team</h2>
+                    <p>Behind TubeShortsGrab is a team of passionate professionals dedicated to creating the best YouTube Shorts downloading experience possible.</p>
+                    
+                    <div class="team-grid">
+                        <div class="team-member">
+                            <div class="text-label">John Smith</div>
+                            <h3>John Smith</h3>
+                            <p>Founder & CEO</p>
+                        </div>
+                        <div class="team-member">
+                            <div class="text-label">Sarah Johnson</div>
+                            <h3>Sarah Johnson</h3>
+                            <p>Lead Developer</p>
+                        </div>
+                        <div class="team-member">
+                            <div class="text-label">Michael Chen</div>
+                            <h3>Michael Chen</h3>
+                            <p>UX/UI Designer</p>
+                        </div>
+                        <div class="team-member">
+                            <div class="text-label">Emily Rodriguez</div>
+                            <h3>Emily Rodriguez</h3>
+                            <p>Backend Engineer</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Our Technology</h2>
+                    <p>TubeShortsGrab utilizes cutting-edge technology to provide a seamless downloading experience:</p>
+                    
+                    <h3>Advanced Processing Engine</h3>
+                    <p>Our proprietary processing engine can handle thousands of requests simultaneously, ensuring fast and reliable downloads even during peak usage times.</p>
+                    
+                    <h3>Cloud-Based Infrastructure</h3>
+                    <p>TubeShortsGrab is built on a robust cloud infrastructure that scales automatically based on demand, providing consistent performance regardless of user load.</p>
+                    
+                    <h3>Intelligent Format Detection</h3>
+                    <p>Our system automatically detects the best available formats for each video, ensuring you always get the highest quality possible.</p>
+                    
+                    <h3>Secure Download Protocols</h3>
+                    <p>All downloads are processed through secure channels, protecting your data and ensuring a safe downloading experience.</p>
+                    
+                    <h3>Continuous Updates</h3>
+                    <p>We regularly update our algorithms to adapt to changes in YouTube's platform, ensuring consistent functionality and compatibility.</p>
+                </div>
+
+                <div class="card">
+                    <h2>Our Commitment to Ethical Use</h2>
+                    <p>At TubeShortsGrab, we are committed to promoting the ethical use of our service. We encourage users to:</p>
+                    
+                    <ul>
+                        <li>Respect copyright laws and intellectual property rights</li>
+                        <li>Only download content for personal, non-commercial use</li>
+                        <li>Obtain proper permissions when necessary</li>
+                        <li>Support content creators by engaging with their channels, subscribing, and sharing their work</li>
+                    </ul>
+                    
+                    <p>We believe in the fair use of content and strive to create a platform that benefits both users and content creators alike.</p>
+                </div>
+
+                <div class="card">
+                    <h2>Looking to the Future</h2>
+                    <p>As we continue to grow, TubeShortsGrab remains committed to innovation and improvement. Our roadmap includes:</p>
+                    
+                    <ul>
+                        <li>Expanding format options to include more specialized video and audio formats</li>
+                        <li>Developing mobile applications for even more convenient downloading</li>
+                        <li>Implementing AI-powered recommendations based on your download history</li>
+                        <li>Creating browser extensions for one-click downloading</li>
+                        <li>Establishing partnerships with content creators to promote fair use and support the creative community</li>
+                    </ul>
+                    
+                    <p>We're excited about the future of TubeShortsGrab and look forward to continuing to serve our global community of users with the best YouTube Shorts downloading experience possible.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Page -->
+        <section id="faq" class="page {% if active_page == 'faq' %}active{% endif %}">
+            <div class="container">
+                <h1>Frequently Asked Questions</h1>
+                <p>Find answers to the most common questions about TubeShortsGrab and downloading YouTube Shorts.</p>
+
+                <div class="card">
+                    <div class="faq-item active">
+                        <div class="faq-question">Is TubeShortsGrab completely free to use?</div>
+                        <div class="faq-answer">
+                            <p>Yes, TubeShortsGrab is 100% free to use. We don't charge any fees for downloading YouTube Shorts, and there are no hidden costs or premium tiers. Our service is supported by minimal, non-intrusive advertisements that help us cover our operational costs while keeping the service free for everyone.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Is it legal to download YouTube Shorts?</div>
+                        <div class="faq-answer">
+                            <p>The legality of downloading YouTube content varies by country and context. Generally, downloading videos for personal, non-commercial use falls under "fair use" in many jurisdictions. However, redistributing downloaded content, using it commercially without permission, or downloading copyrighted material may violate copyright laws.</p>
+                            <p>We recommend only downloading content that you have permission to download, such as videos with Creative Commons licenses, public domain content, or your own uploaded videos. Always respect copyright laws and the rights of content creators.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">What video formats and quality options are available?</div>
+                        <div class="faq-answer">
+                            <p>TubeShortsGrab offers multiple download options to suit your needs:</p>
+                            <ul>
+                                <li><strong>MP4 HD:</strong> High-definition video with audio (up to 1080p, depending on the original video quality)</li>
+                                <li><strong>MP4 SD:</strong> Standard-definition video with audio (480p), ideal for saving space</li>
+                                <li><strong>MP3:</strong> Audio-only format, perfect for music or podcasts</li>
+                            </ul>
+                            <p>The available quality options depend on the original quality of the YouTube Short. Our system automatically detects and offers the best available options for each video.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">How do I download a YouTube Short?</div>
+                        <div class="faq-answer">
+                            <p>Downloading a YouTube Short with TubeShortsGrab is simple:</p>
+                            <ol>
+                                <li>Copy the URL of the YouTube Short you want to download</li>
+                                <li>Paste the URL into the input field on our homepage</li>
+                                <li>Click "Search Video" to process the URL</li>
+                                <li>Once the video information appears, select your preferred format (MP4 HD, MP4 SD, or MP3)</li>
+                                <li>Click the download button and save the file to your device</li>
+                            </ol>
+                            <p>The entire process takes just a few seconds, and you'll have your video ready to enjoy offline!</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Do I need to create an account to use TubeShortsGrab?</div>
+                        <div class="faq-answer">
+                            <p>No, TubeShortsGrab does not require any registration or account creation. You can use our service immediately without providing any personal information. Simply visit our website, paste the YouTube Shorts URL, and download your video - no sign-up, no login, no hassle.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Is there a limit to how many videos I can download?</div>
+                        <div class="faq-answer">
+                            <p>There is no strict limit on the number of videos you can download with TubeShortsGrab. However, to ensure fair usage and maintain service quality for all users, we implement reasonable rate limiting during peak times. If you're downloading multiple videos in quick succession, you might occasionally need to wait a short period before downloading more.</p>
+                            <p>For most users downloading videos for personal use, these limits will never be encountered.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Can I download YouTube Shorts on my mobile device?</div>
+                        <div class="faq-answer">
+                            <p>Yes, TubeShortsGrab is fully compatible with mobile devices. Our responsive design works seamlessly on smartphones and tablets, allowing you to download YouTube Shorts directly to your mobile device. The process is the same as on desktop:</p>
+                            <ol>
+                                <li>Copy the YouTube Shorts URL from the YouTube app or mobile browser</li>
+                                <li>Open TubeShortsGrab in your mobile browser</li>
+                                <li>Paste the URL and follow the download steps</li>
+                            </ol>
+                            <p>On iOS devices, downloaded files will typically go to your Files app. On Android, they'll go to your Downloads folder or a location specified by your browser settings.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Why isn't my download starting?</div>
+                        <div class="faq-answer">
+                            <p>If your download isn't starting, there could be several reasons:</p>
+                            <ul>
+                                <li><strong>Invalid URL:</strong> Make sure you're using a valid YouTube Shorts URL (it should contain "youtube.com/shorts/" in the address)</li>
+                                <li><strong>Video Unavailability:</strong> The video might be private, age-restricted, or removed from YouTube</li>
+                                <li><strong>Browser Settings:</strong> Your browser might be blocking downloads or pop-ups</li>
+                                <li><strong>Temporary Service Issues:</strong> Our servers might be experiencing high traffic or maintenance</li>
+                            </ul>
+                            <p>Try refreshing the page, checking your URL, or disabling any ad-blockers or download managers that might interfere with the process. If problems persist, please contact our support team.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Does TubeShortsGrab work with regular YouTube videos?</div>
+                        <div class="faq-answer">
+                            <p>Yes! While TubeShortsGrab is optimized for YouTube Shorts, it also works with regular YouTube videos. You can paste any YouTube video URL, and our system will process it the same way, offering you the available download options based on the video's quality.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Is my data safe when using TubeShortsGrab?</div>
+                        <div class="faq-answer">
+                            <p>Yes, your data is safe with TubeShortsGrab. We prioritize user privacy and security:</p>
+                            <ul>
+                                <li>We do not store the videos you download or keep records of your download history</li>
+                                <li>We do not require personal information like email addresses or names</li>
+                                <li>We use secure HTTPS connections to protect your data during transmission</li>
+                                <li>We do not share any user data with third parties</li>
+                            </ul>
+                            <p>Our privacy policy provides more detailed information about how we handle data. We're committed to maintaining a secure and private service for all our users.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">Can I use TubeShortsGrab for commercial purposes?</div>
+                        <div class="faq-answer">
+                            <p>TubeShortsGrab is designed for personal, non-commercial use. While we don't restrict how you use our service, we strongly encourage respecting copyright laws and YouTube's Terms of Service, which generally prohibit downloading and redistributing content for commercial purposes without proper permissions.</p>
+                            <p>If you're looking to use YouTube content commercially, we recommend:</p>
+                            <ul>
+                                <li>Obtaining explicit permission from the content creator</li>
+                                <li>Using only content with appropriate Creative Commons licenses</li>
+                                <li>Creating original content or using licensed stock footage instead</li>
+                            </ul>
+                            <p>Remember that unauthorized commercial use of copyrighted material can lead to legal consequences.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Page -->
+        <section id="contact" class="page {% if active_page == 'contact' %}active{% endif %}">
+            <div class="container">
+                <h1>Contact Us</h1>
+                <p>Have questions, feedback, or need assistance? We're here to help! Get in touch with our team using the form below or through our contact information.</p>
+
+                <div class="contact-grid">
+                    <div class="card">
+                        <h2>Send Us a Message</h2>
+                        <form id="contact-form">
+                            <div class="form-group">
+                                <label for="name">Your Name</label>
+                                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" rows="5" placeholder="Type your message here..." required></textarea>
+                            </div>
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="contact-info">
+                        <h3>Contact Information</h3>
+                        <div class="contact-detail">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4>Address</h4>
+                                <p>123 Tech Street, Digital City<br>Silicon Valley, CA 94043<br>United States</p>
+                            </div>
+                        </div>
+                        <div class="contact-detail">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h4>Email</h4>
+                                <p>support@ytshortpro.com<br>info@ytshortpro.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-detail">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h4>Phone</h4>
+                                <p>+1 (555) 123-4567<br>+1 (555) 987-6543</p>
+                            </div>
+                        </div>
+                        <div class="contact-detail">
+                            <div class="contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h4>Business Hours</h4>
+                                <p>Monday - Friday: 9:00 AM - 6:00 PM (PST)<br>Saturday: 10:00 AM - 4:00 PM<br>Sunday: Closed</p>
+                            </div>
+                        </div>
+
+                        <h3>Connect With Us</h3>
+                        <div class="social-links">
+                            <a href="https://www.instagram.com/rootedbeast" class="social-link"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Frequently Asked Support Questions</h2>
+                    <div class="faq-item">
+                        <div class="faq-question">How quickly can I expect a response?</div>
+                        <div class="faq-answer">
+                            <p>We strive to respond to all inquiries within 24-48 hours during business days. For urgent matters, please indicate the urgency in your subject line.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">I'm having technical issues with the downloader. What should I do?</div>
+                        <div class="faq-answer">
+                            <p>For technical issues, please provide as much detail as possible, including:</p>
+                            <ul>
+                                <li>The URL you're trying to download</li>
+                                <li>Your browser and device information</li>
+                                <li>Any error messages you're seeing</li>
+                                <li>Screenshots if possible</li>
+                            </ul>
+                            <p>This helps our technical team diagnose and resolve your issue more quickly.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">Do you offer business or API solutions?</div>
+                        <div class="faq-answer">
+                            <p>Yes, we offer API access and custom solutions for businesses and developers. Please contact our business development team at business@ytshortpro.com for more information about our enterprise offerings and pricing.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Terms Page -->
+        <section id="terms" class="page {% if active_page == 'terms' %}active{% endif %}">
+            <div class="container">
+                <h1>Terms of Service</h1>
+                <div class="legal-content">
+                    <p>Welcome to TubeShortsGrab. These Terms of Service ("Terms") govern your use of the TubeShortsGrab website and services (collectively, the "Service"). By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the Terms, you may not access the Service.</p>
+
+                    <h3>1. Acceptance of Terms</h3>
+                    <p>By accessing or using TubeShortsGrab, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. These Terms constitute a legally binding agreement between you and TubeShortsGrab. If you do not agree to these Terms, please do not use our Service.</p>
+                    <p>We reserve the right to modify these Terms at any time. Changes will be effective immediately upon posting on the TubeShortsGrab website. Your continued use of the Service after any changes indicates your acceptance of the modified Terms.</p>
+
+                    <h3>2. Service Description</h3>
+                    <p>TubeShortsGrab is a web-based service that allows users to download YouTube Shorts videos for personal, non-commercial use. The Service processes URLs provided by users and generates downloadable files in various formats.</p>
+                    <p>We strive to maintain the Service's availability and functionality, but we do not guarantee that the Service will be available at all times or that it will function without errors or interruptions.</p>
+
+                    <h3>3. User Eligibility</h3>
+                    <p>You must be at least 13 years old to use TubeShortsGrab. If you are under 18 years old, you must have permission from a parent or legal guardian to use the Service and they must agree to these Terms on your behalf.</p>
+                    <p>By using TubeShortsGrab, you represent and warrant that you meet all eligibility requirements and that you will not use the Service for any purpose that is unlawful or prohibited by these Terms.</p>
+
+                    <h3>4. Intellectual Property and Copyright</h3>
+                    <p>TubeShortsGrab respects intellectual property rights and expects its users to do the same. The Service is designed for downloading content for personal, non-commercial use only, in accordance with applicable fair use or fair dealing provisions of copyright law.</p>
+                    <p>You agree not to use TubeShortsGrab to:</p>
+                    <ul>
+                        <li>Download content that you do not have the legal right to access</li>
+                        <li>Infringe upon any copyright, trademark, patent, or other intellectual property right</li>
+                        <li>Circumvent any technological measure implemented by content owners to protect their intellectual property</li>
+                        <li>Download content for commercial purposes without proper authorization</li>
+                        <li>Redistribute downloaded content without permission from the copyright holder</li>
+                    </ul>
+                    <p>TubeShortsGrab reserves the right to terminate access to the Service for users who repeatedly infringe or are believed to be repeatedly infringing the rights of copyright holders.</p>
+
+                    <h3>5. User Conduct</h3>
+                    <p>When using TubeShortsGrab, you agree to:</p>
+                    <ul>
+                        <li>Comply with all applicable laws and regulations</li>
+                        <li>Respect the intellectual property rights of others</li>
+                        <li>Use the Service only for lawful and authorized purposes</li>
+                        <li>Not attempt to reverse engineer, decompile, or disassemble any portion of the Service</li>
+                        <li>Not use the Service in any manner that could damage, disable, overburden, or impair the Service</li>
+                        <li>Not attempt to gain unauthorized access to any part of the Service, other accounts, or computer systems</li>
+                        <li>Not use automated scripts, bots, or other software to access or use the Service</li>
+                        <li>Not use the Service to distribute malware, viruses, or other malicious code</li>
+                    </ul>
+                    <p>TubeShortsGrab reserves the right to terminate or restrict your access to the Service for violations of these conduct guidelines or for any other reason at our sole discretion.</p>
+
+                    <h3>6. Limitation of Liability</h3>
+                    <p>To the maximum extent permitted by law, TubeShortsGrab and its operators, affiliates, officers, directors, employees, and agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from:</p>
+                    <ul>
+                        <li>Your access to or use of or inability to access or use the Service</li>
+                        <li>Any conduct or content of any third party on the Service</li>
+                        <li>Any content obtained from the Service</li>
+                        <li>Unauthorized access, use, or alteration of your transmissions or content</li>
+                        <li>Any bugs, viruses, trojan horses, or the like that may be transmitted to or through the Service</li>
+                        <li>Any errors or omissions in any content or for any loss or damage of any kind incurred as a result of your use of any content</li>
+                    </ul>
+                    <p>In no event shall our total liability to you for all claims exceed the amount you paid to us, if any, for accessing or using the Service during the twelve (12) months prior to the claim.</p>
+
+                    <h3>7. Disclaimer of Warranties</h3>
+                    <p>The Service is provided "as is" and "as available" without warranties of any kind, either express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement, or course of performance.</p>
+                    <p>TubeShortsGrab does not warrant that: (a) the Service will function uninterrupted, secure, or available at any particular time or location; (b) any errors or defects will be corrected; (c) the Service is free of viruses or other harmful components; or (d) the results of using the Service will meet your requirements.</p>
+
+                    <h3>8. Indemnification</h3>
+                    <p>You agree to defend, indemnify, and hold harmless TubeShortsGrab and its operators, affiliates, officers, directors, employees, and agents from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees) arising from:</p>
+                    <ul>
+                        <li>Your use of and access to the Service</li>
+                        <li>Your violation of any term of these Terms</li>
+                        <li>Your violation of any third-party right, including without limitation any copyright, property, or privacy right</li>
+                        <li>Any claim that your use of the Service caused damage to a third party</li>
+                    </ul>
+                    <p>This defense and indemnification obligation will survive these Terms and your use of the Service.</p>
+
+                    <h3>9. Governing Law</h3>
+                    <p>These Terms shall be governed and construed in accordance with the laws of the United States of America, without regard to its conflict of law provisions.</p>
+                    <p>Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights. If any provision of these Terms is held to be invalid or unenforceable by a court, the remaining provisions of these Terms will remain in effect.</p>
+
+                    <h3>10. Termination</h3>
+                    <p>We may terminate or suspend your access to the Service immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.</p>
+                    <p>Upon termination, your right to use the Service will immediately cease. If you wish to terminate your account, you may simply discontinue using the Service.</p>
+
+                    <h3>11. Changes to Terms</h3>
+                    <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. It is your responsibility to check the Terms periodically for changes. Your continued use of the Service following the posting of any changes to the Terms constitutes acceptance of those changes.</p>
+
+                    <h3>12. Contact Us</h3>
+                    <p>If you have any questions about these Terms, please contact us at legal@ytshortpro.com.</p>
+
+                    <p class="last-updated">Last updated: May 15, 2025</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Privacy Page -->
+        <section id="privacy" class="page {% if active_page == 'privacy' %}active{% endif %}">
+            <div class="container">
+                <h1>Privacy Policy</h1>
+                <div class="legal-content">
+                    <p>At TubeShortsGrab, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the site.</p>
+
+                    <h3>1. Information We Collect</h3>
+                    <p>We collect information in several ways when you use our service:</p>
+                    
+                    <h4>1.1 Information You Provide</h4>
+                    <p>We may collect personal information that you voluntarily provide when using our contact forms or submitting feedback, such as:</p>
+                    <ul>
+                        <li>Name</li>
+                        <li>Email address</li>
+                        <li>Message content</li>
+                    </ul>
+                    <p>We do not require you to create an account or provide personal information to use our core video downloading service.</p>
+                    
+                    <h4>1.2 Automatically Collected Information</h4>
+                    <p>When you visit our website, we automatically collect certain information about your device and usage, including:</p>
+                    <ul>
+                        <li>IP address</li>
+                        <li>Browser type and version</li>
+                        <li>Operating system</li>
+                        <li>Referring website</li>
+                        <li>Pages visited and time spent</li>
+                        <li>Date and time of access</li>
+                        <li>General geographic location (country or city level only)</li>
+                    </ul>
+                    <p>This information is used for service optimization, security, and analytics purposes.</p>
+                    
+                    <h4>1.3 YouTube URLs and Content</h4>
+                    <p>When you use our service to download YouTube Shorts, we process the YouTube URL you provide. We do not permanently store the URLs you enter or the content of the videos you download. This information is processed temporarily only to fulfill your download request.</p>
+
+                    <h3>2. How We Use Your Information</h3>
+                    <p>We use the information we collect for various purposes, including:</p>
+                    <ul>
+                        <li>Providing and maintaining our service</li>
+                        <li>Improving and optimizing our website and service</li>
+                        <li>Understanding how users interact with our service</li>
+                        <li>Detecting, preventing, and addressing technical issues</li>
+                        <li>Responding to your inquiries and support requests</li>
+                        <li>Enforcing our Terms of Service</li>
+                        <li>Protecting against unauthorized or illegal activity</li>
+                    </ul>
+                    <p>We do not use your information to build user profiles or for targeted advertising purposes.</p>
+
+                    <h3>3. Cookies and Tracking Technologies</h3>
+                    <p>TubeShortsGrab uses cookies and similar tracking technologies to track activity on our website and hold certain information. Cookies are files with a small amount of data that may include an anonymous unique identifier.</p>
+                    <p>We use the following types of cookies:</p>
+                    <ul>
+                        <li><strong>Essential Cookies:</strong> Necessary for the website to function properly</li>
+                        <li><strong>Analytical/Performance Cookies:</strong> Allow us to recognize and count the number of visitors and see how visitors move around our website</li>
+                        <li><strong>Functionality Cookies:</strong> Enable the website to provide enhanced functionality and personalization</li>
+                    </ul>
+                    <p>You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service.</p>
+
+                    <h3>4. Data Sharing and Disclosure</h3>
+                    <p>We do not sell, trade, or otherwise transfer your personally identifiable information to outside parties. However, we may share information in the following circumstances:</p>
+                    <ul>
+                        <li><strong>Service Providers:</strong> We may employ third-party companies and individuals to facilitate our service, provide the service on our behalf, perform service-related services, or assist us in analyzing how our service is used. These third parties have access to your information only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.</li>
+                        <li><strong>Legal Requirements:</strong> We may disclose your information if required to do so by law or in response to valid requests by public authorities (e.g., a court or a government agency).</li>
+                        <li><strong>Protection of Rights:</strong> We may disclose your information to protect and defend the rights, property, or safety of TubeShortsGrab, our users, or the public.</li>
+                    </ul>
+
+                    <h3>5. Data Security</h3>
+                    <p>We implement appropriate technical and organizational measures to protect the security of your personal information. However, please be aware that no method of transmission over the Internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your personal information, we cannot guarantee its absolute security.</p>
+                    <p>Some security measures we implement include:</p>
+                    <ul>
+                        <li>Secure HTTPS connections</li>
+                        <li>Regular security assessments</li>
+                        <li>Limited access to personal information</li>
+                        <li>Encryption of sensitive data</li>
+                    </ul>
+
+                    <h3>6. Data Retention</h3>
+                    <p>We retain different types of information for different periods:</p>
+                    <ul>
+                        <li><strong>YouTube URLs and Video Content:</strong> Processed only temporarily to fulfill your download request and not permanently stored</li>
+                        <li><strong>Contact Form Information:</strong> Retained for up to 1 year to respond to and keep records of inquiries</li>
+                        <li><strong>Server Logs:</strong> Retained for up to 90 days for security and troubleshooting purposes</li>
+                        <li><strong>Analytics Data:</strong> Retained in an aggregated, anonymized format for up to 2 years</li>
+                    </ul>
+
+                    <h3>7. Children's Privacy</h3>
+                    <p>Our service is not intended for use by children under the age of 13. We do not knowingly collect personally identifiable information from children under 13. If you are a parent or guardian and you are aware that your child has provided us with personal information, please contact us. If we become aware that we have collected personal information from children without verification of parental consent, we take steps to remove that information from our servers.</p>
+
+                    <h3>8. Your Privacy Rights</h3>
+                    <p>Depending on your location, you may have certain rights regarding your personal information, including:</p>
+                    <ul>
+                        <li><strong>Access:</strong> The right to request copies of your personal information</li>
+                        <li><strong>Rectification:</strong> The right to request that we correct inaccurate information about you</li>
+                        <li><strong>Erasure:</strong> The right to request that we delete your personal information</li>
+                        <li><strong>Restriction:</strong> The right to request that we restrict the processing of your information</li>
+                        <li><strong>Data Portability:</strong> The right to request that we transfer your information to another organization or to you</li>
+                        <li><strong>Objection:</strong> The right to object to our processing of your personal information</li>
+                    </ul>
+                    <p>To exercise any of these rights, please contact us using the information provided in the "Contact Us" section.</p>
+
+                    <h3>9. International Data Transfers</h3>
+                    <p>Your information may be transferred to — and maintained on — computers located outside of your state, province, country, or other governmental jurisdiction where the data protection laws may differ from those of your jurisdiction.</p>
+                    <p>If you are located outside the United States and choose to provide information to us, please note that we transfer the information, including personal information, to the United States and process it there. Your consent to this Privacy Policy followed by your submission of such information represents your agreement to that transfer.</p>
+
+                    <h3>10. Changes to This Privacy Policy</h3>
+                    <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.</p>
+                    <p>You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.</p>
+
+                    <h3>11. Contact Us</h3>
+                    <p>If you have any questions about this Privacy Policy, please contact us at privacy@ytshortpro.com.</p>
+
+                    <p class="last-updated">Last updated: May 15, 2025</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Disclaimer Page -->
+        <section id="disclaimer" class="page {% if active_page == 'disclaimer' %}active{% endif %}">
+            <div class="container">
+                <h1>Disclaimer</h1>
+                <div class="legal-content">
+                    <p>This disclaimer ("Disclaimer") sets forth the general guidelines, disclosures, and terms of your use of the TubeShortsGrab website and any of its products or services (collectively, "Website" or "Service"). This Disclaimer is a legally binding agreement between you ("User", "you" or "your") and TubeShortsGrab ("TubeShortsGrab", "we", "us" or "our"). By accessing and using the Website and Services, you acknowledge that you have read, understood, and agree to be bound by the terms of this Disclaimer. If you do not agree with the terms of this Disclaimer, please do not access the Website and Services.</p>
+
+                    <h3>1. Educational and Informational Purposes</h3>
+                    <p>The information provided by TubeShortsGrab is for general informational and educational purposes only. We make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the Website.</p>
+                    <p>TubeShortsGrab is a tool designed to allow users to download YouTube Shorts videos for personal, non-commercial use. The Service is provided with the understanding that TubeShortsGrab is not engaged in rendering legal, professional, or other advice or services. The information provided is not intended to replace professional advice.</p>
+
+                    <h3>2. Fair Use Disclaimer</h3>
+                    <p>TubeShortsGrab may use copyrighted material which has not always been specifically authorized by the copyright owner. We make such material available for educational purposes, and in accordance with the principles of fair use under Section 107 of the Copyright Act.</p>
+                    <p>If you wish to use copyrighted material from this site for your own purposes that go beyond fair use, you must obtain permission from the copyright owner. If you are the copyright owner of content that appears on TubeShortsGrab and you disagree with our use of your content, please contact us at copyright@ytshortpro.com.</p>
+
+                    <h3>3. External Links Disclaimer</h3>
+                    <p>The Website may contain links to external websites that are not provided or maintained by or in any way affiliated with TubeShortsGrab. Please note that TubeShortsGrab does not guarantee the accuracy, relevance, timeliness, or completeness of any information on these external websites.</p>
+                    <p>We do not endorse any entity, product, or service that may be advertised or referenced on the Website, nor are we responsible for the quality or delivery of the products or services offered, accessed, or advertised by others.</p>
+
+                    <h3>4. Errors and Omissions Disclaimer</h3>
+                    <p>The information given by TubeShortsGrab is for general guidance on matters of interest only. Even though we have taken every precaution to ensure that the content of the Website is both current and accurate, errors can occur. Plus, given the changing nature of laws, rules, and regulations, there may be delays, omissions, or inaccuracies in the information contained on the Website.</p>
+                    <p>TubeShortsGrab is not responsible for any errors or omissions, or for the results obtained from the use of this information. All information on the Website is provided "as is", with no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information.</p>
+
+                    <h3>5. No Responsibility Disclaimer</h3>
+                    <p>The information on the Website is provided with the understanding that TubeShortsGrab is not herein engaged in rendering legal, accounting, tax, or other professional advice and services. As such, it should not be used as a substitute for consultation with professional accounting, tax, legal, or other competent advisers.</p>
+                    <p>In no event shall TubeShortsGrab or its suppliers be liable for any special, incidental, indirect, or consequential damages whatsoever arising out of or in connection with your access or use or inability to access or use the Website.</p>
+
+                    <h3>6. "Use at Your Own Risk" Disclaimer</h3>
+                    <p>All information in the Website is provided "as is", with no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information, and without warranty of any kind, express or implied, including, but not limited to warranties of performance, merchantability, and fitness for a particular purpose.</p>
+                    <p>TubeShortsGrab will not be liable to you or anyone else for any decision made or action taken in reliance on the information given by the Service or for any consequential, special, or similar damages, even if advised of the possibility of such damages.</p>
+
+                    <h3>7. YouTube Content Disclaimer</h3>
+                    <p>TubeShortsGrab is not affiliated with, endorsed by, or sponsored by YouTube, Google LLC, or any of their affiliates or subsidiaries. All YouTube logos, trademarks, service marks, and trade names used herein are the property of YouTube or its affiliates.</p>
+                    <p>TubeShortsGrab provides a service that allows users to download YouTube Shorts videos for personal, non-commercial use only. We strongly encourage users to respect copyright laws and the YouTube Terms of Service. By using TubeShortsGrab, you acknowledge and agree that:</p>
+                    <ul>
+                        <li>You will only download content that you have the legal right to download</li>
+                        <li>You will not use downloaded content for commercial purposes without proper authorization</li>
+                        <li>You will not redistribute downloaded content without permission from the copyright holder</li>
+                        <li>You are solely responsible for your use of any downloaded content</li>
+                    </ul>
+                    <p>TubeShortsGrab does not host, store, or distribute any YouTube content on our servers. Our service merely provides a technical means to convert and download content from YouTube's publicly available services.</p>
+
+                    <h3>8. Technology Limitations Disclaimer</h3>
+                    <p>TubeShortsGrab uses technology to process YouTube URLs and generate downloadable files. While we strive to ensure that our service works correctly at all times, technological limitations, changes to YouTube's platform, or high server load may occasionally affect the functionality of our service.</p>
+                    <p>We do not guarantee that:</p>
+                    <ul>
+                        <li>The service will be available at all times</li>
+                        <li>All YouTube Shorts videos will be downloadable</li>
+                        <li>All download formats will be available for every video</li>
+                        <li>The quality of downloaded videos will match the original quality</li>
+                    </ul>
+                    <p>We regularly update our technology to adapt to changes in YouTube's platform, but there may be periods when certain features are temporarily unavailable.</p>
+
+                    <h3>9. User Responsibility Disclaimer</h3>
+                    <p>By using TubeShortsGrab, you acknowledge and agree that:</p>
+                    <ul>
+                        <li>You are responsible for ensuring that your use of our service complies with applicable laws and regulations</li>
+                        <li>You are responsible for respecting the intellectual property rights of content creators</li>
+                        <li>You will not use our service for any illegal or unauthorized purpose</li>
+                        <li>You will not attempt to manipulate, disrupt, or impose an unreasonable load on our servers or infrastructure</li>
+                    </ul>
+                    <p>TubeShortsGrab reserves the right to terminate access to the service for users who violate these responsibilities.</p>
+
+                    <h3>10. Changes and Amendments</h3>
+                    <p>We reserve the right to modify this Disclaimer or its terms relating to the Website and Services at any time, effective upon posting of an updated version of this Disclaimer on the Website. When we do, we will revise the updated date at the bottom of this page. Continued use of the Website and Services after any such changes shall constitute your consent to such changes.</p>
+
+                    <h3>11. Acceptance of this Disclaimer</h3>
+                    <p>You acknowledge that you have read this Disclaimer and agree to all its terms and conditions. By accessing and using the Website and Services you agree to be bound by this Disclaimer. If you do not agree to abide by the terms of this Disclaimer, you are not authorized to access or use the Website and Services.</p>
+
+                    <h3>12. Contacting Us</h3>
+                    <p>If you would like to contact us to understand more about this Disclaimer or wish to contact us concerning any matter relating to it, you may send an email to legal@ytshortpro.com.</p>
+
+                    <p class="last-updated">Last updated: May 15, 2025</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DMCA Policy Page -->
+        <section id="dmca" class="page {% if active_page == 'dmca' %}active{% endif %}">
+            <div class="container">
+                <h1>DMCA Policy</h1>
+                <div class="legal-content">
+                    <p>TubeShortsGrab respects the intellectual property rights of others and expects its users to do the same. In accordance with the Digital Millennium Copyright Act of 1998 ("DMCA"), we have established the following policy to address claims of copyright infringement.</p>
+
+                    <h3>1. Notification of Claimed Copyright Infringement</h3>
+                    <p>If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement and is accessible on TubeShortsGrab, please notify our copyright agent as set forth in the DMCA. For your complaint to be valid under the DMCA, you must provide the following information in writing:</p>
+                    
+                    <ol>
+                        <li>An electronic or physical signature of a person authorized to act on behalf of the copyright owner;</li>
+                        <li>Identification of the copyrighted work that you claim has been infringed;</li>
+                        <li>Identification of the material that is claimed to be infringing and where it is located on the Service;</li>
+                        <li>Information reasonably sufficient to permit TubeShortsGrab to contact you, such as your address, telephone number, and email address;</li>
+                        <li>A statement that you have a good faith belief that use of the material in the manner complained of is not authorized by the copyright owner, its agent, or law; and</li>
+                        <li>A statement, made under penalty of perjury, that the above information is accurate, and that you are the copyright owner or are authorized to act on behalf of the owner.</li>
+                    </ol>
+                    
+                    <p>The above information must be submitted to our designated copyright agent at:</p>
+                    
+                    <p>
+                        DMCA Compliance<br>
+                        TubeShortsGrab<br>
+                        Email: dmca@ytshortpro.com<br>
+                        Address: 123 Tech Street, Digital City, Silicon Valley, CA 94043, United States
+                    </p>
+
+                    <h3>2. Counter-Notification Procedures</h3>
+                    <p>If you believe that your content that was removed (or to which access was disabled) is not infringing, or that you have the authorization from the copyright owner, the copyright owner's agent, or pursuant to the law, to post and use the material in your content, you may send a counter-notification containing the following information to our copyright agent:</p>
+                    
+                    <ol>
+                        <li>Your physical or electronic signature;</li>
+                        <li>Identification of the content that has been removed or to which access has been disabled and the location at which the content appeared before it was removed or disabled;</li>
+                        <li>A statement that you have a good faith belief that the content was removed or disabled as a result of mistake or a misidentification of the content; and</li>
+                        <li>Your name, address, telephone number, and email address, a statement that you consent to the jurisdiction of the federal court in the district where you reside, and a statement that you will accept service of process from the person who provided notification of the alleged infringement.</li>
+                    </ol>
+                    
+                    <p>If a counter-notification is received by our copyright agent, TubeShortsGrab may send a copy of the counter-notification to the original complaining party informing that person that we may replace the removed content or cease disabling it in 10 business days. Unless the copyright owner files an action seeking a court order against the content provider, member or user, the removed content may be replaced, or access to it restored, in 10 to 14 business days or more after receipt of the counter-notice, at TubeShortsGrab's sole discretion.</p>
+
+                    <h3>3. Repeat Infringer Policy</h3>
+                    <p>TubeShortsGrab operates a strict policy for terminating, in appropriate circumstances, the service access of users who are repeat infringers. We reserve the right to terminate access for users who have been the subject of multiple valid DMCA notifications.</p>
+
+                    <h3>4. Accommodation of Standard Technical Measures</h3>
+                    <p>TubeShortsGrab accommodates and does not interfere with standard technical measures used by copyright owners to identify and protect their works. We implement appropriate technical measures to help copyright owners protect their intellectual property.</p>
+
+                    <h3>5. Modifications to Our DMCA Policy</h3>
+                    <p>TubeShortsGrab reserves the right to modify this DMCA Policy at any time. Changes and clarifications will take effect immediately upon their posting on the website. We encourage users to check this page periodically for any changes.</p>
+
+                    <h3>6. Copyright Education and Compliance</h3>
+                    <p>TubeShortsGrab is committed to educating our users about copyright law and encouraging compliance. We provide information about copyright law and fair use in our Terms of Service and throughout our website. We encourage all users to:</p>
+                    
+                    <ul>
+                        <li>Respect the intellectual property rights of others</li>
+                        <li>Only download content they have the legal right to download</li>
+                        <li>Understand the principles of fair use and copyright limitations</li>
+                        <li>Obtain proper permissions when necessary</li>
+                    </ul>
+                    
+                    <h3>7. Our Approach to Copyright Protection</h3>
+                    <p>At TubeShortsGrab, we take copyright protection seriously. Our approach includes:</p>
+                    
+                    <ul>
+                        <li><strong>Prompt Response:</strong> We respond promptly to all valid DMCA notices, typically within 24-48 business hours.</li>
+                        <li><strong>Fair Processing:</strong> We carefully review all DMCA notices to ensure they meet the statutory requirements before taking action.</li>
+                        <li><strong>Balanced Approach:</strong> We strive to balance the rights of copyright owners with the rights of users to access and use content legally.</li>
+                        <li><strong>Transparency:</strong> We maintain transparency in our copyright enforcement processes and provide clear information to all parties involved.</li>
+                    </ul>
+                    
+                    <h3>8. Contact Information</h3>
+                    <p>If you have any questions about our DMCA Policy or copyright practices, please contact us at:</p>
+                    
+                    <p>
+                        Email: dmca@ytshortpro.com<br>
+                        Phone: +1 (555) 123-4567<br>
+                        Address: 123 Tech Street, Digital City, Silicon Valley, CA 94043, United States
+                    </p>
+
+                    <p class="last-updated">Last updated: May 15, 2025</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3>TubeShortsGrab</h3>
+                <p>The fastest and most reliable way to download YouTube Shorts videos in high quality. No registration required, completely free!</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/rootedbeast" class="social-link"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('about') }}">About Us</a></li>
+                    <li><a href="{{ url_for('faq') }}">FAQ</a></li>
+                    <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('terms') }}">Terms of Service</a></li>
+                    <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+                    <li><a href="{{ url_for('disclaimer') }}">Disclaimer</a></li>
+                    <li><a href="{{ url_for('dmca') }}">DMCA Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('contact') }}">Help Center</a></li>
+                    <li><a href="{{ url_for('faq') }}">Common Issues</a></li>
+                    <li><a href="{{ url_for('contact') }}">Report a Bug</a></li>
+                    <li><a href="{{ url_for('contact') }}">Feedback</a></li>
+                    <li><a href="{{ url_for('contact') }}">Business Inquiries</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 TubeShortsGrab | All Rights Reserved</p>
+            <p>This service is not affiliated with YouTube or Google Inc.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
