@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("Document loaded, initializing app...")
+
+  // Get DOM elements
   const searchForm = document.getElementById("search-form")
   const urlInput = document.getElementById("video-url")
   const searchButton = document.getElementById("search-button")
@@ -6,15 +9,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadingSpinner = document.getElementById("loading-spinner")
   const errorMessage = document.getElementById("error-message")
 
+  // Debug info
+  console.log("Search form:", searchForm)
+  console.log("URL input:", urlInput)
+  console.log("Search button:", searchButton)
+
   // Handle form submission
-  searchForm.addEventListener("submit", (e) => {
-    e.preventDefault()
-    searchVideo()
-  })
+  if (searchForm) {
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault()
+      console.log("Form submitted, searching video...")
+      searchVideo()
+    })
+  } else {
+    console.error("Search form not found in the DOM")
+  }
+
+  // Direct click on search button as fallback
+  if (searchButton) {
+    searchButton.addEventListener("click", (e) => {
+      e.preventDefault()
+      console.log("Search button clicked directly")
+      searchVideo()
+    })
+  }
 
   // Search video function
   function searchVideo() {
-    const url = urlInput.value.trim()
+    const url = urlInput ? urlInput.value.trim() : ""
+    console.log("Searching for URL:", url)
 
     if (!url) {
       showError("Please enter a YouTube URL")
@@ -22,36 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Show loading spinner
-    loadingSpinner.style.display = "block"
-    videoInfoContainer.style.display = "none"
-    errorMessage.style.display = "none"
+    if (loadingSpinner) loadingSpinner.style.display = "block"
+    if (videoInfoContainer) videoInfoContainer.style.display = "none"
+    if (errorMessage) errorMessage.style.display = "none"
 
-    // Send AJAX request to validate URL
-    fetch("/api/validate-url", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: url }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.valid) {
-          // URL is valid, get video info
-          getVideoInfo(url)
-        } else {
-          showError(data.error || "Invalid YouTube URL")
-          loadingSpinner.style.display = "none"
-        }
-      })
-      .catch((error) => {
-        showError("Error validating URL: " + error.message)
-        loadingSpinner.style.display = "none"
-      })
-  }
+    console.log("Sending direct request to get video info")
 
-  // Get video info function
-  function getVideoInfo(url) {
+    // Send direct request to get video info (skip validation step)
     fetch("/api/video-info", {
       method: "POST",
       headers: {
@@ -59,9 +59,13 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       body: JSON.stringify({ url: url }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log("Response status:", response.status)
+        return response.json()
+      })
       .then((data) => {
-        loadingSpinner.style.display = "none"
+        console.log("Video info response:", data)
+        if (loadingSpinner) loadingSpinner.style.display = "none"
 
         if (data.success) {
           displayVideoInfo(data)
@@ -70,13 +74,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
       .catch((error) => {
-        loadingSpinner.style.display = "none"
+        console.error("Error fetching video info:", error)
+        if (loadingSpinner) loadingSpinner.style.display = "none"
         showError("Error retrieving video information: " + error.message)
       })
   }
 
   // Display video info function
   function displayVideoInfo(data) {
+    console.log("Displaying video info:", data)
+
+    if (!videoInfoContainer) {
+      console.error("Video info container not found")
+      return
+    }
+
     // Clear previous content
     videoInfoContainer.innerHTML = ""
 
@@ -119,11 +131,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Set the HTML and show the container
     videoInfoContainer.innerHTML = videoInfoHTML
     videoInfoContainer.style.display = "block"
+    console.log("Video info displayed")
 
     // Add event listeners to download buttons
     document.querySelectorAll(".download-form").forEach((form) => {
       form.addEventListener("submit", function (e) {
         e.preventDefault()
+        console.log("Download form submitted")
 
         const formData = new FormData(this)
         const downloadUrl = this.getAttribute("action")
@@ -141,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
           .then((response) => response.json())
           .then((data) => {
+            console.log("Download response:", data)
             if (data.success) {
               // Create a hidden link and click it to start download
               const downloadLink = document.createElement("a")
@@ -160,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           })
           .catch((error) => {
+            console.error("Download error:", error)
             showError("Error processing download: " + error.message)
             downloadButton.innerHTML = originalButtonText
             downloadButton.disabled = false
@@ -170,14 +186,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Show error function
   function showError(message) {
-    errorMessage.textContent = message
-    errorMessage.style.display = "block"
-    videoInfoContainer.style.display = "none"
+    console.error("Error:", message)
+    if (errorMessage) {
+      errorMessage.textContent = message
+      errorMessage.style.display = "block"
+    } else {
+      alert("Error: " + message)
+    }
+    if (videoInfoContainer) videoInfoContainer.style.display = "none"
+    if (loadingSpinner) loadingSpinner.style.display = "none"
   }
 
-  // Initialize 3D visualization if available
-  let initThreeDemo
-  if (typeof initThreeDemo === "function") {
-    initThreeDemo()
-  }
+  // Test function to verify JavaScript is working
+  console.log("JavaScript initialized successfully")
+
+  // Add a visible indicator that JS is working
+  const jsIndicator = document.createElement("div")
+  jsIndicator.style.display = "none" // Hidden by default, but exists in DOM
+  jsIndicator.id = "js-working-indicator"
+  document.body.appendChild(jsIndicator)
 })
