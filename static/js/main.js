@@ -9,6 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadingSpinner = document.getElementById("loading-spinner")
   const errorMessage = document.getElementById("error-message")
   const rateLimitInfo = document.getElementById("rate-limit-info") || document.createElement("div")
+  const torStatusContainer = document.getElementById("tor-status-container")
+  const torToggleBtn = document.getElementById("tor-toggle")
+  const torRotateBtn = document.getElementById("tor-rotate-ip")
+  const torStatusText = document.getElementById("tor-status-text")
+  const torIpText = document.getElementById("tor-ip")
 
   if (!rateLimitInfo.id) {
     rateLimitInfo.id = "rate-limit-info"
@@ -25,6 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("Search form:", searchForm)
   console.log("URL input:", urlInput)
   console.log("Search button:", searchButton)
+
+  // Initialize Tor status
+  updateTorStatus()
 
   // Handle form submission
   if (searchForm) {
@@ -44,6 +52,142 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Search button clicked directly")
       searchVideo()
     })
+  }
+
+  // Handle Tor toggle button
+  if (torToggleBtn) {
+    torToggleBtn.addEventListener("click", () => {
+      const currentState = torToggleBtn.getAttribute("data-enabled") === "true"
+      toggleTor(!currentState)
+    })
+  }
+
+  // Handle Tor rotate IP button
+  if (torRotateBtn) {
+    torRotateBtn.addEventListener("click", () => {
+      rotateTorIp()
+    })
+  }
+
+  // Function to toggle Tor
+  function toggleTor(enable) {
+    if (torToggleBtn) {
+      torToggleBtn.disabled = true
+      torToggleBtn.textContent = enable ? "Enabling Tor..." : "Disabling Tor..."
+    }
+
+    fetch("/api/tor/toggle", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ enable }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Tor toggle response:", data)
+        if (data.success) {
+          updateTorStatus()
+        } else {
+          showError(data.message || "Error toggling Tor")
+        }
+      })
+      .catch((error) => {
+        console.error("Error toggling Tor:", error)
+        showError("Error toggling Tor: " + error.message)
+      })
+      .finally(() => {
+        if (torToggleBtn) {
+          torToggleBtn.disabled = false
+        }
+      })
+  }
+
+  // Function to rotate Tor IP
+  function rotateTorIp() {
+    if (torRotateBtn) {
+      torRotateBtn.disabled = true
+      torRotateBtn.textContent = "Rotating IP..."
+    }
+
+    fetch("/api/tor/rotate")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Tor rotate response:", data)
+        if (data.success) {
+          if (torIpText) {
+            torIpText.textContent = data.ip
+          }
+          if (torRotateBtn) {
+            torRotateBtn.textContent = "IP Rotated!"
+            setTimeout(() => {
+              torRotateBtn.textContent = "Rotate IP"
+              torRotateBtn.disabled = false
+            }, 2000)
+          }
+        } else {
+          showError(data.message || "Error rotating Tor IP")
+          if (torRotateBtn) {
+            torRotateBtn.textContent = "Rotate IP"
+            torRotateBtn.disabled = false
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error rotating Tor IP:", error)
+        showError("Error rotating Tor IP: " + error.message)
+        if (torRotateBtn) {
+          torRotateBtn.textContent = "Rotate IP"
+          torRotateBtn.disabled = false
+        }
+      })
+  }
+
+  // Function to update Tor status
+  function updateTorStatus() {
+    if (!torStatusContainer) return
+
+    fetch("/api/tor/status")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Tor status response:", data)
+
+        if (torToggleBtn) {
+          torToggleBtn.setAttribute("data-enabled", data.enabled)
+          torToggleBtn.textContent = data.enabled ? "Disable Tor" : "Enable Tor"
+        }
+
+        if (torStatusText) {
+          if (data.status === "connected") {
+            torStatusText.textContent = "Connected"
+            torStatusText.className = "status-connected"
+          } else if (data.status === "error") {
+            torStatusText.textContent = "Error"
+            torStatusText.className = "status-error"
+          } else {
+            torStatusText.textContent = "Disabled"
+            torStatusText.className = "status-disabled"
+          }
+        }
+
+        if (torIpText && data.ip) {
+          torIpText.textContent = data.ip
+        } else if (torIpText) {
+          torIpText.textContent = "N/A"
+        }
+
+        if (torRotateBtn) {
+          torRotateBtn.disabled = data.status !== "connected"
+        }
+
+        torStatusContainer.style.display = "block"
+      })
+      .catch((error) => {
+        console.error("Error getting Tor status:", error)
+        if (torStatusContainer) {
+          torStatusContainer.style.display = "none"
+        }
+      })
   }
 
   // Search video function
@@ -80,12 +224,17 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("Video info response:", data)
         if (loadingSpinner) loadingSpinner.style.display = "none"
 
+        // Update Tor status if using Tor
+        if (data.using_tor) {
+          updateTorStatus()
+        }
+
         if (data.success) {
           displayVideoInfo(data)
         } else {
           // Check if it's a rate limiting issue
           if (data.rate_limited) {
-            showRateLimitError(data.error, data.details)
+            showRateLimitError(data.error, data.details, data.using_tor)
           } else {
             showError(data.error || "Error retrieving video information")
           }
@@ -123,6 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="video-duration">${data.duration}</span>
                         <span class="video-views">${data.views} views</span>
                     </p>
+                    ${
+                      data.using_tor
+                        ? `<p class="tor-info">Using Tor with IP: <span class="tor-ip">${data.tor_ip || "Unknown"}</span></p>`
+                        : ""
+                    }
                 </div>
             </div>
             <div class="download-options">
@@ -186,10 +340,15 @@ document.addEventListener("DOMContentLoaded", () => {
               // Reset button
               downloadButton.innerHTML = originalButtonText
               downloadButton.disabled = false
+
+              // Update Tor status if using Tor
+              if (data.using_tor) {
+                updateTorStatus()
+              }
             } else {
               // Check if it's a rate limiting issue
               if (data.rate_limited) {
-                showRateLimitError(data.error, data.details)
+                showRateLimitError(data.error, data.details, data.using_tor)
               } else {
                 showError(data.error || "Error processing download")
               }
@@ -222,18 +381,36 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Show rate limit error function
-  function showRateLimitError(message, details) {
+  function showRateLimitError(message, details, usingTor) {
     console.error("Rate limit error:", message, details)
 
     if (rateLimitInfo) {
+      let torMessage = ""
+      if (usingTor) {
+        torMessage = `
+          <div class="tor-active">
+            <p>✅ Tor proxy is active and automatically rotating IPs every 10 seconds.</p>
+            <p>Please try again in a few seconds as the system rotates to a new IP address.</p>
+            <button id="manual-rotate-ip" class="action-button">Manually Rotate IP Now</button>
+          </div>
+        `
+      } else {
+        torMessage = `
+          <div class="tor-inactive">
+            <p>❌ Tor proxy is not active. Enable Tor to bypass rate limiting.</p>
+            <button id="enable-tor-btn" class="action-button">Enable Tor Proxy</button>
+          </div>
+        `
+      }
+
       rateLimitInfo.innerHTML = `
         <h3>YouTube Rate Limiting Detected</h3>
         <p>${message}</p>
+        ${torMessage}
         <div class="solutions">
-          <h4>Solutions:</h4>
+          <h4>Additional Solutions:</h4>
           <ul>
             <li>Wait a few minutes before trying again</li>
-            <li>Try using a VPN to change your IP address</li>
             <li>Update yt-dlp to the latest version <button id="update-yt-dlp-btn" class="small-button">Update Now</button></li>
             <li>Try a different YouTube video</li>
           </ul>
@@ -295,6 +472,33 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         })
       }
+
+      // Add event listener for the "Enable Tor Proxy" button
+      const enableTorBtn = document.getElementById("enable-tor-btn")
+      if (enableTorBtn) {
+        enableTorBtn.addEventListener("click", function () {
+          this.disabled = true
+          this.textContent = "Enabling Tor..."
+
+          toggleTor(true)
+        })
+      }
+
+      // Add event listener for the "Manually Rotate IP" button
+      const manualRotateBtn = document.getElementById("manual-rotate-ip")
+      if (manualRotateBtn) {
+        manualRotateBtn.addEventListener("click", function () {
+          this.disabled = true
+          this.textContent = "Rotating IP..."
+
+          rotateTorIp()
+
+          setTimeout(() => {
+            this.disabled = false
+            this.textContent = "Manually Rotate IP Now"
+          }, 3000)
+        })
+      }
     } else {
       showError(message)
     }
@@ -303,6 +507,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loadingSpinner) loadingSpinner.style.display = "none"
     if (errorMessage) errorMessage.style.display = "none"
   }
+
+  // Set up periodic Tor status updates if Tor is enabled
+  setInterval(updateTorStatus, 10000) // Update every 10 seconds
 
   // Test function to verify JavaScript is working
   console.log("JavaScript initialized successfully")
