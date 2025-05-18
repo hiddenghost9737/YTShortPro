@@ -37,6 +37,23 @@
                 </div>
 
                 <div class="download-form-container">
+                    <!-- Tor Status -->
+                    <div id="tor-status-container" class="tor-status-container" style="display: none;">
+                        <div class="tor-status">
+                            <span class="tor-status-label">Tor Status:</span>
+                            <span id="tor-status-text" class="status-disabled">Disabled</span>
+                            
+                            <div class="tor-ip-container">
+                                <span class="tor-ip-label">Current IP:</span>
+                                <span id="tor-ip" class="tor-ip">N/A</span>
+                            </div>
+                        </div>
+                        <div class="tor-controls">
+                            <button id="tor-toggle" class="tor-button" data-enabled="false">Enable Tor</button>
+                            <button id="tor-rotate-ip" class="tor-button" disabled>Rotate IP</button>
+                        </div>
+                    </div>
+
                     <form id="search-form">
                         <div class="input-group">
                             <input type="text" id="video-url" placeholder="Paste YouTube URL here..." required>
@@ -70,6 +87,11 @@
                         <h3>Audio Only</h3>
                         <p>Extract audio in MP3 format</p>
                     </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔄</div>
+                        <h3>Tor Integration</h3>
+                        <p>Bypass rate limits with automatic IP rotation</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -79,6 +101,11 @@
                 <h2>About TubeShortsGrab</h2>
                 <p>TubeShortsGrab is a free online tool that allows you to download YouTube Shorts and regular YouTube videos in various formats. Our service is fast, reliable, and completely free to use.</p>
                 <p>We built this tool because we believe in making content accessible to everyone. Whether you want to watch videos offline, extract audio for listening, or save your favorite content, TubeShortsGrab makes it easy.</p>
+                
+                <h3>Tor Integration</h3>
+                <p>TubeShortsGrab now features Tor integration to bypass YouTube's rate limiting. When enabled, all requests to YouTube are routed through the Tor network, and your IP address is automatically rotated every 10 seconds to ensure uninterrupted downloads.</p>
+                <p>This feature is especially useful when YouTube blocks your requests due to too many download attempts. With Tor integration, you can continue downloading without interruption.</p>
+                
                 <h3>How It Works</h3>
                 <ol>
                     <li>Paste a YouTube Shorts or regular YouTube video URL</li>
@@ -106,8 +133,16 @@
                     <p>We currently offer three formats: MP4 HD (1080p), MP4 SD (480p), and MP3 (audio only).</p>
                 </div>
                 <div class="faq-item">
-                    <h3>Can I download age-restricted videos?</h3>
-                    <p>No, TubeShortsGrab cannot download age-restricted or private videos.</p>
+                    <h3>What is Tor integration?</h3>
+                    <p>Tor integration routes your download requests through the Tor network, changing your IP address every 10 seconds. This helps bypass YouTube's rate limiting and ensures uninterrupted downloads.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do I need to install Tor?</h3>
+                    <p>Yes, to use the Tor integration feature, you need to have Tor installed on your system. You can download it from the <a href="https://www.torproject.org/download/" target="_blank">official Tor website</a>.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Why am I getting rate limited by YouTube?</h3>
+                    <p>YouTube limits the number of videos you can download in a short period to prevent abuse. When you hit this limit, you'll see a "rate limiting" error. Enabling Tor integration can help bypass this limitation.</p>
                 </div>
                 <div class="faq-item">
                     <h3>Is it legal to download YouTube videos?</h3>
@@ -115,7 +150,7 @@
                 </div>
                 <div class="faq-item">
                     <h3>Why isn't my download working?</h3>
-                    <p>There could be several reasons: the video might be private, age-restricted, or the URL might be incorrect. If you're having issues, try a different video or check the URL.</p>
+                    <p>There could be several reasons: the video might be private, age-restricted, or the URL might be incorrect. If you're getting rate limited, try enabling Tor integration.</p>
                 </div>
             </div>
         </section>
