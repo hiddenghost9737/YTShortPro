@@ -1,214 +1,183 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Navigation
-    const navToggle = document.getElementById('nav-toggle');
-    const nav = document.getElementById('nav');
-    
-    // Toggle mobile navigation
-    if (navToggle) {
-        navToggle.addEventListener('click', function() {
-            nav.classList.toggle('active');
-        });
+document.addEventListener("DOMContentLoaded", () => {
+  const searchForm = document.getElementById("search-form")
+  const urlInput = document.getElementById("video-url")
+  const searchButton = document.getElementById("search-button")
+  const videoInfoContainer = document.getElementById("video-info")
+  const loadingSpinner = document.getElementById("loading-spinner")
+  const errorMessage = document.getElementById("error-message")
+
+  // Handle form submission
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault()
+    searchVideo()
+  })
+
+  // Search video function
+  function searchVideo() {
+    const url = urlInput.value.trim()
+
+    if (!url) {
+      showError("Please enter a YouTube URL")
+      return
     }
 
-    // FAQ Accordion
-    const faqQuestions = document.querySelectorAll('.faq-question');
-    
-    faqQuestions.forEach(question => {
-        question.addEventListener('click', function() {
-            const faqItem = this.parentElement;
-            faqItem.classList.toggle('active');
-        });
-    });
+    // Show loading spinner
+    loadingSpinner.style.display = "block"
+    videoInfoContainer.style.display = "none"
+    errorMessage.style.display = "none"
 
-    // Download Form
-    const form = document.getElementById('download-form');
-    const urlInput = document.getElementById('video-url');
-    const urlError = document.getElementById('url-error');
-    const searchBtn = document.getElementById('search-btn');
-    const loader = document.getElementById('loader');
-    const result = document.getElementById('result');
-    const videoThumbnail = document.getElementById('video-thumbnail');
-    const videoTitle = document.getElementById('video-title');
-    const videoAuthor = document.getElementById('video-author');
-    const videoDuration = document.getElementById('video-duration');
-    const videoViews = document.getElementById('video-views');
-    const downloadOptions = document.getElementById('download-options');
-
-    // Only proceed if we're on a page with the download form
-    if (form) {
-        // Real-time URL validation
-        urlInput.addEventListener('input', function() {
-            const url = urlInput.value.trim();
-            if (url) {
-                // Validate URL format client-side
-                fetch('/api/validate-url', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: url }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.valid) {
-                        urlError.textContent = data.error;
-                    } else {
-                        urlError.textContent = "";
-                    }
-                })
-                .catch(error => {
-                    console.error('Error validating URL:', error);
-                });
-            } else {
-                urlError.textContent = "";
-            }
-        });
-
-        // Handle form submission
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const url = urlInput.value.trim();
-            
-            // Validate URL
-            if (!url) {
-                urlError.textContent = "Please enter a YouTube URL";
-                return;
-            }
-            
-            // Show loader
-            searchBtn.disabled = true;
-            loader.style.display = "block";
-            result.style.display = "none";
-            
-            try {
-                // Get video info from server
-                const response = await fetch('/api/video-info', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: url }),
-                });
-                
-                const data = await response.json();
-                
-                if (!data.success) {
-                    urlError.textContent = data.error;
-                    loader.style.display = "none";
-                    searchBtn.disabled = false;
-                    return;
-                }
-                
-                // Update UI with video data
-                videoThumbnail.src = data.thumbnail;
-                videoThumbnail.alt = data.title;
-                videoTitle.textContent = data.title;
-                videoAuthor.textContent = data.author;
-                videoDuration.textContent = `Duration: ${data.duration}`;
-                videoViews.textContent = `Views: ${data.views}`;
-                
-                // Clear previous download options
-                downloadOptions.innerHTML = '';
-                
-                // Add download buttons for each format
-                data.formats.forEach(format => {
-                    const downloadBtn = document.createElement('div');
-                    downloadBtn.className = 'download-btn';
-                    
-                    const button = document.createElement('button');
-                    button.innerHTML = `<i class="fas fa-${format.id === 'mp3' ? 'music' : 'download'}"></i> Download ${format.name}`;
-                    button.addEventListener('click', function() {
-                        downloadVideo(url, format.id);
-                    });
-                    
-                    downloadBtn.appendChild(button);
-                    downloadOptions.appendChild(downloadBtn);
-                });
-                
-                // Show result
-                result.style.display = "block";
-            } catch (error) {
-                console.error('Error:', error);
-                urlError.textContent = "Error processing video. Please try again.";
-            } finally {
-                // Hide loader
-                loader.style.display = "none";
-                searchBtn.disabled = false;
-            }
-        });
-
-        // Function to handle download
-        function downloadVideo(url, format) {
-            // Create a form to submit the download request
-            const downloadForm = document.createElement('form');
-            downloadForm.method = 'POST';
-            downloadForm.action = '/download';
-            
-            // Add URL input
-            const urlInput = document.createElement('input');
-            urlInput.type = 'hidden';
-            urlInput.name = 'url';
-            urlInput.value = url;
-            downloadForm.appendChild(urlInput);
-            
-            // Add format input
-            const formatInput = document.createElement('input');
-            formatInput.type = 'hidden';
-            formatInput.name = 'format';
-            formatInput.value = format;
-            downloadForm.appendChild(formatInput);
-            
-            // Add CSRF token if needed (for Flask with CSRF protection)
-            if (window.csrfToken) {
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrf_token';
-                csrfInput.value = window.csrfToken;
-                downloadForm.appendChild(csrfInput);
-            }
-            
-            // Submit the form
-            document.body.appendChild(downloadForm);
-            
-            // Show loading message
-            const downloadBtn = event.target;
-            const originalText = downloadBtn.innerHTML;
-            downloadBtn.disabled = true;
-            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            
-            // Submit the form and handle the response
-            fetch(downloadForm.action, {
-                method: 'POST',
-                body: new FormData(downloadForm)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Create a temporary link and trigger download
-                    const link = document.createElement('a');
-                    link.href = data.download_url;
-                    link.target = '_blank';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // Reset button
-                    downloadBtn.innerHTML = originalText;
-                    downloadBtn.disabled = false;
-                } else {
-                    alert('Download failed: ' + data.error);
-                    downloadBtn.innerHTML = originalText;
-                    downloadBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred during download. Please try again.');
-                downloadBtn.innerHTML = originalText;
-                downloadBtn.disabled = false;
-            });
-            
-            // Clean up
-            document.body.removeChild(downloadForm);
+    // Send AJAX request to validate URL
+    fetch("/api/validate-url", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: url }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.valid) {
+          // URL is valid, get video info
+          getVideoInfo(url)
+        } else {
+          showError(data.error || "Invalid YouTube URL")
+          loadingSpinner.style.display = "none"
         }
+      })
+      .catch((error) => {
+        showError("Error validating URL: " + error.message)
+        loadingSpinner.style.display = "none"
+      })
+  }
+
+  // Get video info function
+  function getVideoInfo(url) {
+    fetch("/api/video-info", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: url }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        loadingSpinner.style.display = "none"
+
+        if (data.success) {
+          displayVideoInfo(data)
+        } else {
+          showError(data.error || "Error retrieving video information")
+        }
+      })
+      .catch((error) => {
+        loadingSpinner.style.display = "none"
+        showError("Error retrieving video information: " + error.message)
+      })
+  }
+
+  // Display video info function
+  function displayVideoInfo(data) {
+    // Clear previous content
+    videoInfoContainer.innerHTML = ""
+
+    // Create video info HTML
+    const videoInfoHTML = `
+            <div class="video-details">
+                <div class="video-thumbnail">
+                    <img src="${data.thumbnail}" alt="${data.title}" />
+                </div>
+                <div class="video-metadata">
+                    <h3 class="video-title">${data.title}</h3>
+                    <p class="video-author">By: ${data.author}</p>
+                    <p class="video-stats">
+                        <span class="video-duration">${data.duration}</span>
+                        <span class="video-views">${data.views} views</span>
+                    </p>
+                </div>
+            </div>
+            <div class="download-options">
+                <h4>Download Options</h4>
+                <div class="format-buttons">
+                    ${data.formats
+                      .map(
+                        (format) => `
+                        <form action="/download" method="post" class="download-form">
+                            <input type="hidden" name="url" value="${data.url || urlInput.value}">
+                            <input type="hidden" name="format" value="${format.id}">
+                            <button type="submit" class="download-button">
+                                <span class="format-name">${format.name}</span>
+                                <span class="format-quality">${format.quality}</span>
+                            </button>
+                        </form>
+                    `,
+                      )
+                      .join("")}
+                </div>
+            </div>
+        `
+
+    // Set the HTML and show the container
+    videoInfoContainer.innerHTML = videoInfoHTML
+    videoInfoContainer.style.display = "block"
+
+    // Add event listeners to download buttons
+    document.querySelectorAll(".download-form").forEach((form) => {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault()
+
+        const formData = new FormData(this)
+        const downloadUrl = this.getAttribute("action")
+        const downloadButton = this.querySelector(".download-button")
+
+        // Change button text to show loading
+        const originalButtonText = downloadButton.innerHTML
+        downloadButton.innerHTML = '<span class="spinner"></span> Processing...'
+        downloadButton.disabled = true
+
+        // Send download request
+        fetch(downloadUrl, {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Create a hidden link and click it to start download
+              const downloadLink = document.createElement("a")
+              downloadLink.href = data.download_url
+              downloadLink.download = ""
+              document.body.appendChild(downloadLink)
+              downloadLink.click()
+              document.body.removeChild(downloadLink)
+
+              // Reset button
+              downloadButton.innerHTML = originalButtonText
+              downloadButton.disabled = false
+            } else {
+              showError(data.error || "Error processing download")
+              downloadButton.innerHTML = originalButtonText
+              downloadButton.disabled = false
+            }
+          })
+          .catch((error) => {
+            showError("Error processing download: " + error.message)
+            downloadButton.innerHTML = originalButtonText
+            downloadButton.disabled = false
+          })
+      })
+    })
+  }
+
+  // Show error function
+  function showError(message) {
+    errorMessage.textContent = message
+    errorMessage.style.display = "block"
+    videoInfoContainer.style.display = "none"
+  }
+
+  // Initialize 3D visualization if available
+  let initThreeDemo
+  if (typeof initThreeDemo === "function") {
+    initThreeDemo()
+  }
+})
