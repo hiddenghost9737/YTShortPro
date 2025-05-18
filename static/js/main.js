@@ -8,6 +8,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const videoInfoContainer = document.getElementById("video-info")
   const loadingSpinner = document.getElementById("loading-spinner")
   const errorMessage = document.getElementById("error-message")
+  const rateLimitInfo = document.getElementById("rate-limit-info") || document.createElement("div")
+
+  if (!rateLimitInfo.id) {
+    rateLimitInfo.id = "rate-limit-info"
+    rateLimitInfo.className = "error-box rate-limit-error"
+    rateLimitInfo.style.display = "none"
+    if (errorMessage && errorMessage.parentNode) {
+      errorMessage.parentNode.insertBefore(rateLimitInfo, errorMessage.nextSibling)
+    } else if (loadingSpinner && loadingSpinner.parentNode) {
+      loadingSpinner.parentNode.insertBefore(rateLimitInfo, loadingSpinner.nextSibling)
+    }
+  }
 
   // Debug info
   console.log("Search form:", searchForm)
@@ -48,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (loadingSpinner) loadingSpinner.style.display = "block"
     if (videoInfoContainer) videoInfoContainer.style.display = "none"
     if (errorMessage) errorMessage.style.display = "none"
+    if (rateLimitInfo) rateLimitInfo.style.display = "none"
 
     console.log("Sending direct request to get video info")
 
@@ -70,7 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
           displayVideoInfo(data)
         } else {
-          showError(data.error || "Error retrieving video information")
+          // Check if it's a rate limiting issue
+          if (data.rate_limited) {
+            showRateLimitError(data.error, data.details)
+          } else {
+            showError(data.error || "Error retrieving video information")
+          }
         }
       })
       .catch((error) => {
@@ -169,7 +187,12 @@ document.addEventListener("DOMContentLoaded", () => {
               downloadButton.innerHTML = originalButtonText
               downloadButton.disabled = false
             } else {
-              showError(data.error || "Error processing download")
+              // Check if it's a rate limiting issue
+              if (data.rate_limited) {
+                showRateLimitError(data.error, data.details)
+              } else {
+                showError(data.error || "Error processing download")
+              }
               downloadButton.innerHTML = originalButtonText
               downloadButton.disabled = false
             }
@@ -195,6 +218,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (videoInfoContainer) videoInfoContainer.style.display = "none"
     if (loadingSpinner) loadingSpinner.style.display = "none"
+    if (rateLimitInfo) rateLimitInfo.style.display = "none"
+  }
+
+  // Show rate limit error function
+  function showRateLimitError(message, details) {
+    console.error("Rate limit error:", message, details)
+
+    if (rateLimitInfo) {
+      rateLimitInfo.innerHTML = `
+        <h3>YouTube Rate Limiting Detected</h3>
+        <p>${message}</p>
+        <div class="solutions">
+          <h4>Solutions:</h4>
+          <ul>
+            <li>Wait a few minutes before trying again</li>
+            <li>Try using a VPN to change your IP address</li>
+            <li>Update yt-dlp to the latest version <button id="update-yt-dlp-btn" class="small-button">Update Now</button></li>
+            <li>Try a different YouTube video</li>
+          </ul>
+        </div>
+        <div class="details-toggle">
+          <button id="show-error-details" class="small-button">Show Technical Details</button>
+          <div id="error-details" style="display: none;">
+            <pre>${details || "No additional details available"}</pre>
+          </div>
+        </div>
+      `
+      rateLimitInfo.style.display = "block"
+
+      // Add event listener for the "Show Technical Details" button
+      const showDetailsBtn = document.getElementById("show-error-details")
+      if (showDetailsBtn) {
+        showDetailsBtn.addEventListener("click", function () {
+          const errorDetails = document.getElementById("error-details")
+          if (errorDetails) {
+            if (errorDetails.style.display === "none") {
+              errorDetails.style.display = "block"
+              this.textContent = "Hide Technical Details"
+            } else {
+              errorDetails.style.display = "none"
+              this.textContent = "Show Technical Details"
+            }
+          }
+        })
+      }
+
+      // Add event listener for the "Update Now" button
+      const updateBtn = document.getElementById("update-yt-dlp-btn")
+      if (updateBtn) {
+        updateBtn.addEventListener("click", function () {
+          this.disabled = true
+          this.textContent = "Updating..."
+
+          fetch("/update-yt-dlp")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                this.textContent = `Updated to v${data.version}`
+                alert(`yt-dlp updated successfully to version ${data.version}. Please try your download again.`)
+              } else {
+                this.textContent = "Update Failed"
+                alert(`Failed to update yt-dlp: ${data.error}`)
+              }
+            })
+            .catch((error) => {
+              console.error("Error updating yt-dlp:", error)
+              this.textContent = "Update Failed"
+              alert(`Error updating yt-dlp: ${error.message}`)
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.disabled = false
+                this.textContent = "Update Now"
+              }, 5000)
+            })
+        })
+      }
+    } else {
+      showError(message)
+    }
+
+    if (videoInfoContainer) videoInfoContainer.style.display = "none"
+    if (loadingSpinner) loadingSpinner.style.display = "none"
+    if (errorMessage) errorMessage.style.display = "none"
   }
 
   // Test function to verify JavaScript is working
