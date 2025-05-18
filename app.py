@@ -9,8 +9,12 @@ import tempfile
 import subprocess
 import time
 import random
+import threading
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
+
+# Import Tor controller
+from utils.tor_controller import get_tor_controller, init_tor, stop_tor
 
 # Configure logging
 logging.basicConfig(
@@ -27,9 +31,17 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
 app.config['DOWNLOAD_FOLDER'] = 'downloads'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB
+app.config['USE_TOR'] = True  # Enable Tor by default
 
 # Create downloads directory if it doesn't exist
 os.makedirs(app.config['DOWNLOAD_FOLDER'], exist_ok=True)
+
+# Initialize Tor when the app starts
+if app.config['USE_TOR']:
+    tor_thread = threading.Thread(target=init_tor)
+    tor_thread.daemon = True
+    tor_thread.start()
+    logger.info("Tor initialization started in background thread")
 
 # Helper function to extract video ID from YouTube URL
 def extract_video_id(url):
@@ -87,9 +99,17 @@ def is_ffmpeg_installed():
         logger.error("ffmpeg is not installed or not in PATH")
         return False
 
-# Function to run yt-dlp with exponential backoff and additional options
-def run_yt_dlp_with_retry(cmd, max_retries=3, initial_delay=1):
-    logger.debug(f"Running yt-dlp command with retry: {' '.join(cmd)}")
+# Check if Tor is installed
+def is_tor_installed():
+    try:
+        result = subprocess.run(['tor', '--version'], capture_output=True, text=True)
+        return result.returncode == 0
+    except (subprocess.SubprocessError, FileNotFoundError):
+        return False
+
+# Function to run yt-dlp with Tor proxy
+def run_yt_dlp_with_tor(cmd, max_retries=3, initial_delay=1):
+    logger.debug(f"Running yt-dlp command with Tor: {' '.join(cmd)}")
     
     # Add options to help avoid rate limiting
     if '--sleep-interval' not in ' '.join(cmd):
@@ -112,12 +132,28 @@ def run_yt_dlp_with_retry(cmd, max_retries=3, initial_delay=1):
         ]
         cmd.extend(['--referer', random.choice(referers)])
     
+    # Add Tor proxy if enabled
+    if app.config['USE_TOR']:
+        tor_controller = get_tor_controller()
+        proxy_url = tor_controller.get_proxy_url()
+        
+        # Add proxy to yt-dlp command
+        if '--proxy' not in ' '.join(cmd):
+            cmd.extend(['--proxy', proxy_url])
+    
     delay = initial_delay
     last_error = None
     
     for attempt in range(max_retries):
         try:
             logger.debug(f"Attempt {attempt + 1}/{max_retries}")
+            
+            # If using Tor, rotate IP before each attempt
+            if app.config['USE_TOR'] and attempt > 0:
+                tor_controller = get_tor_controller()
+                new_ip = tor_controller.renew_tor_ip()
+                logger.info(f"Rotated Tor IP for retry: {new_ip}")
+            
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             return result
         except subprocess.CalledProcessError as e:
@@ -126,8 +162,15 @@ def run_yt_dlp_with_retry(cmd, max_retries=3, initial_delay=1):
             
             # Check if it's a rate limiting issue
             if "HTTP Error 429" in e.stderr or "Too Many Requests" in e.stderr:
-                logger.warning("Rate limiting detected, increasing delay")
-                delay *= 2  # Exponential backoff
+                logger.warning("Rate limiting detected, rotating Tor IP and retrying")
+                if app.config['USE_TOR']:
+                    tor_controller = get_tor_controller()
+                    new_ip = tor_controller.renew_tor_ip()
+                    logger.info(f"Rotated Tor IP after rate limit: {new_ip}")
+                delay = 1  # With Tor, we can retry quickly with a new IP
+            else:
+                # For other errors, use exponential backoff
+                delay *= 2
             
             # Sleep before retrying
             sleep_time = delay + random.uniform(0, 1)  # Add jitter
@@ -146,7 +189,22 @@ def index():
     # Check yt-dlp version
     yt_dlp_version = get_yt_dlp_version()
     
-    return render_template('index.html', yt_dlp_version=yt_dlp_version)
+    # Check Tor status
+    tor_status = False
+    tor_ip = None
+    
+    if app.config['USE_TOR']:
+        try:
+            tor_controller = get_tor_controller()
+            tor_status, tor_ip = tor_controller.test_connection()
+        except Exception as e:
+            logger.error(f"Error checking Tor status: {e}")
+    
+    return render_template('index.html', 
+                          yt_dlp_version=yt_dlp_version,
+                          use_tor=app.config['USE_TOR'],
+                          tor_status=tor_status,
+                          tor_ip=tor_ip)
 
 @app.route('/api/validate-url', methods=['POST'])
 def validate_url():
@@ -197,6 +255,21 @@ def get_video_info():
                 'solution': 'Install yt-dlp using pip: pip install -U yt-dlp'
             })
         
+        # Check Tor status if enabled
+        if app.config['USE_TOR']:
+            tor_controller = get_tor_controller()
+            tor_status, tor_ip = tor_controller.test_connection()
+            
+            if not tor_status:
+                logger.warning("Tor is not working properly")
+                return jsonify({
+                    'success': False,
+                    'error': 'Tor proxy is not working properly. Please check your Tor installation.',
+                    'solution': 'Make sure Tor is installed and running correctly.'
+                })
+            
+            logger.info(f"Using Tor with IP: {tor_ip}")
+        
         # Extract video information using yt-dlp
         try:
             logger.debug(f"Running yt-dlp to get video info for URL: {url}")
@@ -213,7 +286,7 @@ def get_video_info():
             ]
             
             try:
-                result = run_yt_dlp_with_retry(cmd)
+                result = run_yt_dlp_with_tor(cmd)
                 video_data = json.loads(result.stdout)
             except subprocess.CalledProcessError as e:
                 # Check if it's a rate limiting issue
@@ -221,17 +294,19 @@ def get_video_info():
                     logger.error("YouTube rate limiting detected")
                     return jsonify({
                         'success': False, 
-                        'error': 'YouTube rate limiting detected. Please try again later or use a VPN.',
+                        'error': 'YouTube rate limiting detected. Using Tor to bypass...',
                         'details': e.stderr,
-                        'rate_limited': True
+                        'rate_limited': True,
+                        'using_tor': app.config['USE_TOR']
                     })
                 elif "HTTP Error 400" in e.stderr or "Bad Request" in e.stderr:
                     logger.error("YouTube bad request error")
                     return jsonify({
                         'success': False, 
-                        'error': 'YouTube rejected the request. This may be due to rate limiting or IP blocking.',
+                        'error': 'YouTube rejected the request. Using Tor to bypass...',
                         'details': e.stderr,
-                        'rate_limited': True
+                        'rate_limited': True,
+                        'using_tor': app.config['USE_TOR']
                     })
                 else:
                     logger.error(f"Error running yt-dlp: {e.stderr}")
@@ -284,6 +359,12 @@ def get_video_info():
                 }
             ]
             
+            # Get current Tor IP if using Tor
+            current_ip = None
+            if app.config['USE_TOR']:
+                tor_controller = get_tor_controller()
+                _, current_ip = tor_controller.test_connection()
+            
             logger.info(f"Video info retrieved successfully for video ID: {video_id}")
             
             # Return video information
@@ -296,7 +377,9 @@ def get_video_info():
                 'views': views,
                 'thumbnail': thumbnail,
                 'formats': formats,
-                'url': url  # Include the original URL
+                'url': url,  # Include the original URL
+                'using_tor': app.config['USE_TOR'],
+                'tor_ip': current_ip
             })
         
         except json.JSONDecodeError as e:
@@ -338,6 +421,21 @@ def download_video():
                 'solution': 'Install ffmpeg from https://ffmpeg.org/download.html'
             })
         
+        # Check Tor status if enabled
+        if app.config['USE_TOR']:
+            tor_controller = get_tor_controller()
+            tor_status, tor_ip = tor_controller.test_connection()
+            
+            if not tor_status:
+                logger.warning("Tor is not working properly")
+                return jsonify({
+                    'success': False,
+                    'error': 'Tor proxy is not working properly. Please check your Tor installation.',
+                    'solution': 'Make sure Tor is installed and running correctly.'
+                })
+            
+            logger.info(f"Using Tor with IP: {tor_ip}")
+        
         # Create a unique filename
         unique_id = str(uuid.uuid4())
         output_path = os.path.join(app.config['DOWNLOAD_FOLDER'], unique_id)
@@ -372,29 +470,31 @@ def download_video():
         cmd.extend(['-o', f'{output_path}.%(ext)s'])
         cmd.append(url)
         
-        # Download the video using yt-dlp with retry
+        # Download the video using yt-dlp with Tor
         try:
             logger.debug(f"Running yt-dlp to download video with command: {' '.join(cmd)}")
             
             try:
-                run_yt_dlp_with_retry(cmd)
+                run_yt_dlp_with_tor(cmd)
             except subprocess.CalledProcessError as e:
                 # Check if it's a rate limiting issue
                 if "HTTP Error 429" in e.stderr or "Too Many Requests" in e.stderr:
                     logger.error("YouTube rate limiting detected during download")
                     return jsonify({
                         'success': False, 
-                        'error': 'YouTube rate limiting detected. Please try again later or use a VPN.',
+                        'error': 'YouTube rate limiting detected. Using Tor to bypass...',
                         'details': e.stderr,
-                        'rate_limited': True
+                        'rate_limited': True,
+                        'using_tor': app.config['USE_TOR']
                     })
                 elif "HTTP Error 400" in e.stderr or "Bad Request" in e.stderr:
                     logger.error("YouTube bad request error during download")
                     return jsonify({
                         'success': False, 
-                        'error': 'YouTube rejected the request. This may be due to rate limiting or IP blocking.',
+                        'error': 'YouTube rejected the request. Using Tor to bypass...',
                         'details': e.stderr,
-                        'rate_limited': True
+                        'rate_limited': True,
+                        'using_tor': app.config['USE_TOR']
                     })
                 else:
                     logger.error(f"Error running yt-dlp for download: {e.stderr}")
@@ -414,10 +514,11 @@ def download_video():
             ]
             
             try:
-                result = run_yt_dlp_with_retry(info_cmd)
+                result = run_yt_dlp_with_tor(info_cmd)
                 title = result.stdout.strip()
             except subprocess.CalledProcessError:
                 # If getting title fails, use a generic name
+                video_id = extract_video_id(url) or 'video'
                 title = f"video_{video_id}"
             
             # Clean the title for use in a filename
@@ -438,7 +539,8 @@ def download_video():
             
             return jsonify({
                 'success': True,
-                'download_url': download_url
+                'download_url': download_url,
+                'using_tor': app.config['USE_TOR']
             })
         
         except Exception as e:
@@ -477,6 +579,111 @@ def serve_download(file_id):
     except Exception as e:
         logger.exception(f"Error serving download: {str(e)}")
         abort(500)
+
+@app.route('/api/tor/status')
+def tor_status():
+    """Get the current Tor status and IP"""
+    if not app.config['USE_TOR']:
+        return jsonify({
+            'enabled': False,
+            'status': 'disabled',
+            'message': 'Tor is disabled'
+        })
+    
+    try:
+        tor_controller = get_tor_controller()
+        status, ip = tor_controller.test_connection()
+        
+        if status:
+            return jsonify({
+                'enabled': True,
+                'status': 'connected',
+                'ip': ip,
+                'message': f'Tor is connected with IP: {ip}'
+            })
+        else:
+            return jsonify({
+                'enabled': True,
+                'status': 'error',
+                'message': 'Tor is enabled but not working properly'
+            })
+    except Exception as e:
+        logger.exception(f"Error getting Tor status: {str(e)}")
+        return jsonify({
+            'enabled': True,
+            'status': 'error',
+            'message': f'Error checking Tor status: {str(e)}'
+        })
+
+@app.route('/api/tor/rotate')
+def rotate_tor_ip():
+    """Manually rotate the Tor IP address"""
+    if not app.config['USE_TOR']:
+        return jsonify({
+            'success': False,
+            'message': 'Tor is disabled'
+        })
+    
+    try:
+        tor_controller = get_tor_controller()
+        new_ip = tor_controller.renew_tor_ip()
+        
+        if new_ip:
+            return jsonify({
+                'success': True,
+                'ip': new_ip,
+                'message': f'Tor IP rotated to: {new_ip}'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to rotate Tor IP'
+            })
+    except Exception as e:
+        logger.exception(f"Error rotating Tor IP: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error rotating Tor IP: {str(e)}'
+        })
+
+@app.route('/api/tor/toggle', methods=['POST'])
+def toggle_tor():
+    """Enable or disable Tor"""
+    try:
+        data = request.get_json()
+        enable = data.get('enable', True)
+        
+        if enable and not app.config['USE_TOR']:
+            # Enable Tor
+            app.config['USE_TOR'] = True
+            init_tor()
+            return jsonify({
+                'success': True,
+                'enabled': True,
+                'message': 'Tor enabled'
+            })
+        elif not enable and app.config['USE_TOR']:
+            # Disable Tor
+            app.config['USE_TOR'] = False
+            stop_tor()
+            return jsonify({
+                'success': True,
+                'enabled': False,
+                'message': 'Tor disabled'
+            })
+        else:
+            # No change
+            return jsonify({
+                'success': True,
+                'enabled': app.config['USE_TOR'],
+                'message': f'Tor is already {"enabled" if app.config["USE_TOR"] else "disabled"}'
+            })
+    except Exception as e:
+        logger.exception(f"Error toggling Tor: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error toggling Tor: {str(e)}'
+        })
 
 @app.route('/update-yt-dlp')
 def update_yt_dlp():
@@ -521,6 +728,13 @@ def page_not_found(e):
 def server_error(e):
     logger.error(f"500 error: {str(e)}")
     return render_template('500.html'), 500
+
+@app.teardown_appcontext
+def shutdown_tor(exception=None):
+    """Shutdown Tor when the application exits"""
+    if app.config['USE_TOR']:
+        logger.info("Shutting down Tor...")
+        stop_tor()
 
 if __name__ == '__main__':
     logger.info("Starting application")
